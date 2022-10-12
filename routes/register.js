@@ -3,12 +3,12 @@ const router = express.Router();
 const joi = require("joi");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const User = require("./users");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 const registerSchema = joi.object({
     name: joi.string().required().min(2),
-    email: joi.string().required().email().min(6),
+    email: joi.string().required().email().min(6).lowercase(),
     password: joi.string().required().min(8),
     biz: joi.boolean().required()
 });
@@ -16,16 +16,18 @@ const registerSchema = joi.object({
 
 router.post("/", async (req, res) => {
     try {
+        req.body.email = req.body.email.toLowerCase()
         //joi validation
         const {
             error
         } = registerSchema.validate(req.body)
         if (error) return res.status(400).send(error.message)
         //user exists
+
         let user = await User.findOne({
             email: req.body.email
         })
-        if (user) return res.status(400).send("User already exists")
+        if (user) return res.status(400).send("User already exists");
         //add new user
         user = new User(req.body)
         //enctypt password
