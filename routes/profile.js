@@ -10,7 +10,7 @@ router.get("/", auth, async (req, res) => {
         if (!user) return res.status(404).send("Wrong details");
         res.status(200).send(_.pick(user, ["name", "email", "biz"]));
     } catch (error) {
-        
+        res.status(400).send("Error " + error);
     }
 
 })
